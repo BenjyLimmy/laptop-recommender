@@ -122,6 +122,7 @@ firebase.json
 .history
 .project
 .svn/
+docker-push.txt
 
 # Performance testing
 *.jfr
