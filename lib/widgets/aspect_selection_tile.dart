@@ -25,6 +25,7 @@ class AspectSelectionTile extends StatefulWidget {
 class _AspectSelectionTileState extends State<AspectSelectionTile>
     with SingleTickerProviderStateMixin {
   bool _isHovering = false;
+  bool _isPressed = false;
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
   // In aspect_selection_tile.dart
@@ -112,7 +113,6 @@ class _AspectSelectionTileState extends State<AspectSelectionTile>
     double width = MediaQuery.of(context).size.width;
     bool showImportance = width >= 1200;
     bool showNumbers = width >= 1000;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final double tileHeight = widget.isSelected ? 180.0 : 70.0;
@@ -124,25 +124,45 @@ class _AspectSelectionTileState extends State<AspectSelectionTile>
               ? SystemMouseCursors.forbidden
               : SystemMouseCursors.click,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 200),
+            duration: Duration(milliseconds: 50),
             height: tileHeight,
-            margin: EdgeInsets.only(
-              top: _isHovering ? 0 : 4,
-              bottom: _isHovering ? 4 : 0,
-            ),
-            transform: Matrix4.translationValues(
-                shakeOffset, 0, 0), // Apply shake offset
+            // margin: EdgeInsets.only(
+            //   top: _isHovering && !_isPressed ? 0 : 4,
+            //   bottom: _isHovering && !_isPressed ? 4 : 0,
+            // ),
+            transform: Matrix4.identity()
+              // ..setEntry(3, 2, 0.001) // Perspective effect
+              ..translate(
+                  shakeOffset, _isPressed ? 4.0 : 0.0, _isPressed ? 0.0 : 0.0),
+            // ..scale(_isPressed ? 0.98 : 1.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              boxShadow: _isHovering
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      )
-                    ]
-                  : [],
+              boxShadow: [
+                if (!_isPressed)
+                  BoxShadow(
+                    color: (widget.isSelected
+                            ? _getImportanceColor(widget.weight)
+                            : _isHovering
+                                ? Colors.purple
+                                : Colors.white)
+                        .withOpacity(0.2),
+                    blurRadius: 1,
+                    offset: Offset(0, 3),
+                    spreadRadius: -3,
+                  ),
+                if (!_isPressed)
+                  BoxShadow(
+                    color: (widget.isSelected
+                            ? _getImportanceColor(widget.weight)
+                            : _isHovering
+                                ? Colors.purple
+                                : Colors.white)
+                        .withOpacity(0.2),
+                    blurRadius: 1,
+                    offset: Offset(0, 5),
+                    spreadRadius: -3,
+                  ),
+              ],
             ),
             child: RippleAnimation(
               key: _rippleKey,
@@ -151,6 +171,9 @@ class _AspectSelectionTileState extends State<AspectSelectionTile>
                   : Theme.of(context).colorScheme.primary.withOpacity(0.2),
               duration: Duration(milliseconds: 400),
               child: GestureDetector(
+                onTapDown: (_) => setState(() => _isPressed = true),
+                onTapUp: (_) => setState(() => _isPressed = false),
+                onTapCancel: () => setState(() => _isPressed = false),
                 onTap: () {
                   if (widget.onSelectedChanged != null) {
                     _rippleKey.currentState?.startRipple();
@@ -162,51 +185,55 @@ class _AspectSelectionTileState extends State<AspectSelectionTile>
                     // Normal selection toggle
                     widget.onSelectedChanged!(!widget.isSelected);
                   }
+                  setState(() => _isPressed = false);
                 },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
-                  child: Card(
-                    elevation: _isHovering ? 4 : (widget.isSelected ? 2 : 1),
-                    color: widget.isSelected
-                        ? Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withOpacity(_isHovering ? 0.5 : 0.3)
-                        : widget.onSelectedChanged == null && _isHovering
-                            ? Colors.red
-                                .withOpacity(0.1) // Hint at disabled state
-                            : _isHovering
-                                ? Theme.of(context).cardColor.withOpacity(0.9)
-                                : null,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: widget.isSelected
-                          ? BorderSide(
-                              color: _getImportanceColor(widget.weight),
-                              width: 2)
-                          : BorderSide(
-                              color: widget.onSelectedChanged == null &&
-                                      _isHovering
-                                  ? Colors.red.withOpacity(
-                                      0.5) // Red border for disabled
-                                  : _isHovering
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .primary
-                                          .withOpacity(0.5)
-                                      : Colors.grey.shade300,
-                              width: _isHovering ? 1.5 : 1),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(12),
-                      child: widget.isSelected
-                          ? _buildSelectedContent(
-                              context,
-                              showNumber: showNumbers,
-                              showImportance: showImportance,
-                            )
-                          : _buildUnselectedContent(context),
-                    ),
+                child: Card(
+                  elevation: _isPressed
+                      ? 0
+                      : (_isHovering ? 4 : (widget.isSelected ? 2 : 1)),
+                  shadowColor: _isPressed
+                      ? Colors.transparent
+                      : Colors.black.withOpacity(0.3),
+                  color: widget.isSelected
+                      ? Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withOpacity(
+                              _isPressed ? 0.6 : (_isHovering ? 0.5 : 0.3))
+                      : widget.onSelectedChanged == null && _isHovering
+                          ? Colors.red.withOpacity(0.1)
+                          : _isHovering
+                              ? Theme.of(context)
+                                  .cardColor
+                                  .withOpacity(_isPressed ? 1.0 : 0.9)
+                              : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: widget.isSelected
+                        ? BorderSide(
+                            color: _getImportanceColor(widget.weight),
+                            width: 2.0)
+                        : BorderSide(
+                            color:
+                                widget.onSelectedChanged == null && _isHovering
+                                    ? Colors.red.withOpacity(0.5)
+                                    : _isHovering
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                            .withOpacity(_isPressed ? 0.7 : 0.5)
+                                        : Colors.grey.shade300,
+                            width: (_isHovering ? 1.5 : 1)),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: widget.isSelected
+                        ? _buildSelectedContent(
+                            context,
+                            showNumber: showNumbers,
+                            showImportance: showImportance,
+                          )
+                        : _buildUnselectedContent(context),
                   ),
                 ),
               ),

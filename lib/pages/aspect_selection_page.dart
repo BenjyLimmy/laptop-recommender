@@ -47,15 +47,15 @@ class _AspectSelectionPageState extends State<AspectSelectionPage>
           (prefs.aspectWeights[b] ?? 0).compareTo(prefs.aspectWeights[a] ?? 0));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Customize Your Preferences',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        forceMaterialTransparency: true,
-      ),
+      // appBar: AppBar(
+      //   title: Text(
+      //     'Customize Your Preferences',
+      //     style: TextStyle(fontWeight: FontWeight.bold),
+      //   ),
+      //   centerTitle: true,
+      //   elevation: 0,
+      //   forceMaterialTransparency: true,
+      // ),
       body: Column(
         children: [
           // Top section with instruction cards
