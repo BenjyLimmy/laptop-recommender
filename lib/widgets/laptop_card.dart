@@ -74,10 +74,17 @@ class _LaptopCardState extends State<LaptopCard> {
                   // Image with gradient overlay and price tag
                   Stack(
                     children: [
+                      Positioned.fill(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                       // Image
                       Hero(
                         tag: widget.laptop.title ?? '',
-                        child: Container(
+                        child: SizedBox(
                           height: 300,
                           width: double.infinity,
                           child: Image.network(
@@ -96,21 +103,7 @@ class _LaptopCardState extends State<LaptopCard> {
                         ),
                       ),
                       // Gradient overlay
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.7),
-                                Colors.transparent,
-                              ],
-                              stops: const [0.0, 0.5],
-                            ),
-                          ),
-                        ),
-                      ),
+
                       // Price tag
                       if (widget.laptop.price != null)
                         Positioned(
