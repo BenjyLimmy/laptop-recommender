@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:laptop_reco/entities/laptop.dart';
 import 'package:intl/intl.dart';

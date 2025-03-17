@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:laptop_reco/entities/laptop.dart';
-import 'package:laptop_reco/widgets/laptop_card.dart';
 import 'package:laptop_reco/widgets/star_rating.dart';
 
 class LaptopDetailsPage extends StatelessWidget {
