@@ -338,41 +338,35 @@ class _LaptopCardState extends State<LaptopCard> {
                     // Title and external link
                     Wrap(
                       children: [
-                        Expanded(
-                          child: Text(
-                            getFirstPart(widget.laptop.title ?? ''),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 30,
-                                ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        Text(
+                          getFirstPart(widget.laptop.title ?? ''),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30,
+                                  ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(width: 8),
                         if (widget.laptop.product_url != null &&
                             widget.laptop.product_url != "///")
-                          Expanded(
-                            child: IconButton(
-                              icon: const Icon(Icons.open_in_new,
-                                  color: Colors.blue),
-                              tooltip: 'Visit product website',
-                              onPressed: () async {
-                                final url = widget.laptop.product_url!
-                                        .startsWith('http')
-                                    ? widget.laptop.product_url
-                                    : 'https://${widget.laptop.product_url}';
-                                // You'll need to add the url_launcher package
-                                launchUrl(Uri.parse(url!));
-                                // For now, show a snackbar
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Would open: $url')),
-                                );
-                              },
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.open_in_new,
+                                color: Colors.blue),
+                            tooltip: 'Visit product website',
+                            onPressed: () async {
+                              final url =
+                                  widget.laptop.product_url!.startsWith('http')
+                                      ? widget.laptop.product_url
+                                      : 'https://${widget.laptop.product_url}';
+                              // You'll need to add the url_launcher package
+                              launchUrl(Uri.parse(url!));
+                              // For now, show a snackbar
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Would open: $url')),
+                              );
+                            },
                           ),
                       ],
                     ),
