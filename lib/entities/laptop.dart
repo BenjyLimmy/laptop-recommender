@@ -57,16 +57,36 @@ class Laptop {
         ? new Histogram.fromJson(json['histogram'])
         : null;
     review_summary = json['review_summary'];
-    pos5Aspects = json['pos_5_aspects'].cast<String>();
-    neg5Aspects = json['neg_5_aspects'].cast<String>();
-    pos4Aspects = json['pos_4_aspects'].cast<String>();
-    neg4Aspects = json['neg_4_aspects'].cast<String>();
-    pos3Aspects = json['pos_3_aspects'].cast<String>();
-    neg3Aspects = json['neg_3_aspects'].cast<String>();
-    pos2Aspects = json['pos_2_aspects'].cast<String>();
-    neg2Aspects = json['neg_2_aspects'].cast<String>();
-    pos1Aspects = json['pos_1_aspects'].cast<String>();
-    neg1Aspects = json['neg_1_aspects'].cast<String>();
+    pos5Aspects = json['pos_5_aspects'] != null
+        ? List<String>.from(json['pos_5_aspects'])
+        : null;
+    pos4Aspects = json['pos_4_aspects'] != null
+        ? List<String>.from(json['pos_4_aspects'])
+        : null;
+    pos3Aspects = json['pos_3_aspects'] != null
+        ? List<String>.from(json['pos_3_aspects'])
+        : null;
+    pos2Aspects = json['pos_2_aspects'] != null
+        ? List<String>.from(json['pos_2_aspects'])
+        : null;
+    pos1Aspects = json['pos_1_aspects'] != null
+        ? List<String>.from(json['pos_1_aspects'])
+        : null;
+    neg5Aspects = json['neg_5_aspects'] != null
+        ? List<String>.from(json['neg_5_aspects'])
+        : null;
+    neg4Aspects = json['neg_4_aspects'] != null
+        ? List<String>.from(json['neg_4_aspects'])
+        : null;
+    neg3Aspects = json['neg_3_aspects'] != null
+        ? List<String>.from(json['neg_3_aspects'])
+        : null;
+    neg2Aspects = json['neg_2_aspects'] != null
+        ? List<String>.from(json['neg_2_aspects'])
+        : null;
+    neg1Aspects = json['neg_1_aspects'] != null
+        ? List<String>.from(json['neg_1_aspects'])
+        : null;
     if (json['review'] != null) {
       reviews = <Review>[];
       json['review'].forEach((v) {
