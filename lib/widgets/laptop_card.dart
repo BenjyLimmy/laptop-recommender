@@ -458,13 +458,19 @@ class _LaptopCardState extends State<LaptopCard> {
                                     radius: 16,
                                     backgroundColor: _getRandomAvatarColor(
                                         review.reviewerName ?? ''),
-                                    child: Text(
-                                      review.reviewerName?[0] ?? '',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    child: review.reviewerName != null
+                                        ? Text(
+                                            review.reviewerName?[0] ?? '',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.person,
+                                            size: 20,
+                                            color: Colors.white,
+                                          ),
                                     // Alternative: use an anonymous icon instead of initials
                                     // child: Icon(Icons.person, color: Colors.white),
                                   ),
