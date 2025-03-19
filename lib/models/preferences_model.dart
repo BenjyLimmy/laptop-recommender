@@ -263,7 +263,7 @@ class PreferencesModel extends ChangeNotifier {
             List<Laptop> laptops =
                 jsonResponse.map((json) => Laptop.fromJson(json)).toList();
             // print(jsonResponse);
-
+            // await Future.delayed(Duration(seconds: 2));
             setLoading(
                 'Almost ready with your personalized recommendations...');
             setIdle();
