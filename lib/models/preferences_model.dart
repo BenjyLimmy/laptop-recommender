@@ -206,58 +206,81 @@ class PreferencesModel extends ChangeNotifier {
     return await rootBundle.loadString('lib/sample_data.json');
   }
 
+  Map<String, String> aspectToLabelMap = {
+    'DISPLAY': 'Display',
+    'BATTERY': 'Battery',
+    'PERFORMANCE': 'Performance',
+    'DESIGN': 'Design',
+    'AUDIO': 'Audio',
+    'BUILD_QUALITY': 'Build Quality',
+    'PRICE': 'Price',
+    'PORTABILITY': 'Portability',
+  };
+
   // Get the top [count] laptops based on current preferences
   Future<List<Laptop>> getRecommendedLaptops(int count) async {
-    // Sort all laptops by weighted score (highest first)
-    //   List<Laptop> sorted = List.from(_allLaptops);
-    //   sorted.sort((a, b) => b
-    //       .totalScore(aspectSelected, aspectWeights)
-    //       .compareTo(a.totalScore(aspectSelected, aspectWeights)));
-    //   // Take the top N laptops
-    //   return sorted.take(count).toList();
-    // }
+    // Define possible API endpoints
+    final apiHosts = [
+      'localhost:8081', // Local development
+      '10.0.2.2:8081', // Android emulator to host
+      'host.docker.internal:8081', // Docker container to host
+      'api:8081', // Docker container to container (if using docker-compose)
+    ];
 
     try {
-      // Set loading state with a custom message
       setLoading('Finding the perfect laptops based on your preferences...');
 
-      final response = await http
-          .get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
-
-      if (response.statusCode == 200) {
-        // If the server did return a 200 OK response,
-        // then parse the JSON.
-        // List<dynamic> jsonResponse = json.decode(response.body);
-        // List<Laptop> laptops =
-        //     jsonResponse.map((json) => Laptop.fromJson(json)).toList();
-
-        // First loading phase
-        // await Future.delayed(Duration(seconds: 2));
-
-        // Update loading message to show progress
-        setLoading('Analyzing laptop features and your preferences...');
-        // await Future.delayed(Duration(seconds: 2));
-
-        // Final loading message
-        setLoading('Almost ready with your personalized recommendations...');
-        // await Future.delayed(Duration(seconds: 1));
-        // Parse the static JSON data
-        final jsonString = await _loadJsonFromAsset();
-        List<dynamic> jsonResponse = json.decode(jsonString);
-        List<Laptop> laptops =
-            jsonResponse.map((json) => Laptop.fromJson(json)).toList();
-
-        // Set state back to idle
-        setIdle();
-        _allLaptops = laptops;
-        return laptops;
+      // Extract selected aspects
+      List<String> selectedAspects = [];
+      aspectSelected.forEach((aspect, isSelected) {
+        if (isSelected) {
+          selectedAspects.add(aspect.toUpperCase().replaceAll(' ', '_'));
+        }
+      });
+      // Build query parameters
+      Map<String, String> queryParams = {};
+      if (selectedAspects.isNotEmpty) {
+        queryParams['aspects'] = (selectedAspects
+              ..sort((a, b) => (aspectWeights[aspectToLabelMap[b]] ?? 0)
+                  .compareTo(aspectWeights[aspectToLabelMap[a]] ?? 0)))
+            .join(',');
       } else {
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
-        throw Exception('Failed to load laptops');
+        queryParams['aspects'] = '';
       }
+
+      // Try each possible host until one works
+      Exception? lastException;
+      for (String host in apiHosts) {
+        try {
+          final uri = Uri.http(host, '/laptops', queryParams);
+          print('Attempting to connect to: $uri');
+
+          final response = await http.get(uri).timeout(Duration(seconds: 5));
+
+          if (response.statusCode == 200) {
+            print('Successfully connected to $host');
+            List<dynamic> jsonResponse = json.decode(response.body);
+            List<Laptop> laptops =
+                jsonResponse.map((json) => Laptop.fromJson(json)).toList();
+            // print(jsonResponse);
+
+            setLoading(
+                'Almost ready with your personalized recommendations...');
+            setIdle();
+            _allLaptops = laptops;
+            return laptops;
+          }
+        } catch (e) {
+          print('Failed to connect to $host: $e');
+          lastException = e as Exception;
+          continue; // Try the next host
+        }
+      }
+
+      // If we get here, all connection attempts failed
+      throw lastException ?? Exception('Could not connect to any API endpoint');
     } catch (e) {
-      // Set error state
+      print('Error: ${e.toString()}');
       setError('Failed to load laptops: ${e.toString()}');
       return [];
     }
