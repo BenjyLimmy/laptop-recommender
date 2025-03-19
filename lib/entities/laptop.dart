@@ -170,7 +170,17 @@ class Review {
     reviewerName = json['reviewer_name'];
     starRating = json['star_rating'];
     reviewDate = json['review_date'];
-    reviewText = json['review_text'];
+    if (json['review_text'] != null) {
+      String text = json['review_text'];
+
+      // Use a regex to replace the entire sequence
+      text = text.replaceAllMapped(
+          RegExp('â[\u0080-\u00FF][\u0080-\u00FF]'), (match) => "'");
+
+      reviewText = text;
+    } else {
+      reviewText = null;
+    }
   }
 
   Map<String, dynamic> toJson() {
