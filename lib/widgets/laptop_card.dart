@@ -16,6 +16,34 @@ class LaptopCard extends StatefulWidget {
 class _LaptopCardState extends State<LaptopCard> {
   bool _isHovering = false;
 
+  void showLaptopPopup() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black87,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _buildDetailDialog(context);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 0.05);
+          const end = Offset.zero;
+          final tween = Tween(begin: begin, end: end);
+          final offsetAnimation = animation.drive(tween);
+
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: 'RM ');
@@ -23,23 +51,6 @@ class _LaptopCardState extends State<LaptopCard> {
 
     double width = MediaQuery.of(context).size.width;
     bool showReviewInMain = width >= 1200;
-    final reviews = [
-      {
-        'reviewer': 'Alice',
-        'rating': 4.5,
-        'comment': 'Great laptop, excellent display and battery!'
-      },
-      {
-        'reviewer': 'Bob',
-        'rating': 3.5,
-        'comment': 'Good performance but design could improve.'
-      },
-      {
-        'reviewer': 'Charlie',
-        'rating': 5.0,
-        'comment': 'Absolutely love it, exceeded my expectations!'
-      },
-    ];
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -53,34 +64,7 @@ class _LaptopCardState extends State<LaptopCard> {
               ..translate(0.0, -2.0, 0.0))
             : Matrix4.identity(),
         child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                opaque: false,
-                barrierDismissible: true,
-                barrierColor: Colors.black87,
-                pageBuilder: (context, animation, secondaryAnimation) {
-                  return _buildDetailDialog(context, reviews);
-                },
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05);
-                  const end = Offset.zero;
-                  final tween = Tween(begin: begin, end: end);
-                  final offsetAnimation = animation.drive(tween);
-
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: offsetAnimation,
-                      child: child,
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 400),
-              ),
-            );
-          },
+          onTap: showLaptopPopup,
           child: Card(
             elevation: _isHovering ? 8 : 4,
             shape: RoundedRectangleBorder(
@@ -240,17 +224,10 @@ class _LaptopCardState extends State<LaptopCard> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Optional: Add comparison checkbox or other actions here
                           TextButton.icon(
                             icon: const Icon(Icons.info_outline),
                             label: const Text('View Details'),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    _buildDetailDialog(context, reviews),
-                              );
-                            },
+                            onPressed: showLaptopPopup,
                           ),
                           // if (_isHovering)
                           //   AnimatedOpacity(
@@ -282,8 +259,7 @@ class _LaptopCardState extends State<LaptopCard> {
     );
   }
 
-  Widget _buildDetailDialog(
-      BuildContext context, List<Map<String, dynamic>> reviews) {
+  Widget _buildDetailDialog(BuildContext context) {
     return AnimatedBuilder(
       animation: ModalRoute.of(context)!.animation!,
       builder: (context, child) {
