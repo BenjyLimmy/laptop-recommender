@@ -641,9 +641,15 @@ class _LaptopCardState extends State<LaptopCard> {
         SizedBox(height: 4),
         _buildAspectRating('Performance', _getAspectRating('PERFORMANCE')),
         SizedBox(height: 4),
-        _buildAspectRating('Design', _getAspectRating('DESIGN')),
+        _buildAspectRating('Design', _getAspectRating('PRICE')),
         SizedBox(height: 4),
         _buildAspectRating('Audio', _getAspectRating('AUDIO')),
+        SizedBox(height: 4),
+        _buildAspectRating('Build Quality', _getAspectRating('BUILD_QUALITY')),
+        SizedBox(height: 4),
+        _buildAspectRating('Portability', _getAspectRating('PORTABILITY')),
+        SizedBox(height: 4),
+        _buildAspectRating('Price', _getAspectRating('DESIGN')),
       ],
     );
   }
@@ -679,11 +685,26 @@ class _LaptopCardState extends State<LaptopCard> {
 
   // Get top aspects to display as chips
   List<String> _getTopAspects(Laptop laptop) {
-    List<String> aspects = [];
-    if (laptop.pos5Aspects != null) aspects.addAll(laptop.pos5Aspects!);
-    if (aspects.length < 3 && laptop.pos4Aspects != null)
-      aspects.addAll(laptop.pos4Aspects!);
-    return aspects;
+    // Create a map of aspect name to score
+    Map<String, int?> aspectScores = {
+      'AUDIO': laptop.audioScore,
+      'BATTERY': laptop.batteryScore,
+      'BUILD_QUALITY': laptop.buildQualityScore,
+      'DESIGN': laptop.designScore,
+      'DISPLAY': laptop.displayScore,
+      'PERFORMANCE': laptop.performanceScore,
+      'PORTABILITY': laptop.portabilityScore,
+      'PRICE': laptop.priceScore,
+    };
+
+    // Filter out null scores and sort by score value (highest first)
+    List<MapEntry<String, int?>> sortedAspects = aspectScores.entries
+        .where((entry) => entry.value != null)
+        .toList()
+      ..sort((a, b) => (b.value ?? 0).compareTo(a.value ?? 0));
+
+    // Return top 3 aspects (or fewer if there aren't 3)
+    return sortedAspects.take(3).map((entry) => entry.key).toList();
   }
 
   // Format aspect name for display
@@ -718,24 +739,55 @@ class _LaptopCardState extends State<LaptopCard> {
 
   // Get rating for a specific aspect
   double _getAspectRating(String aspect) {
-    // These are placeholder calculations. In a real app, you'd need to extract this data
-    // from your API or process the aspect lists more thoroughly.
     aspect = aspect.toUpperCase();
     final laptop = widget.laptop;
 
-    if (laptop.pos5Aspects != null && laptop.pos5Aspects!.contains(aspect))
-      return 5.0;
-    if (laptop.pos4Aspects != null && laptop.pos4Aspects!.contains(aspect))
-      return 4.0;
-    if (laptop.pos3Aspects != null && laptop.pos3Aspects!.contains(aspect))
-      return 3.0;
-    if (laptop.pos2Aspects != null && laptop.pos2Aspects!.contains(aspect))
-      return 2.0;
-    if (laptop.pos1Aspects != null && laptop.pos1Aspects!.contains(aspect))
-      return 1.0;
+    // Get raw score for this aspect
+    int? score;
+    switch (aspect) {
+      case 'AUDIO':
+        score = laptop.audioScore;
+        break;
+      case 'BATTERY':
+        score = laptop.batteryScore;
+        break;
+      case 'BUILD_QUALITY':
+        score = laptop.buildQualityScore;
+        break;
+      case 'DESIGN':
+        score = laptop.designScore;
+        break;
+      case 'DISPLAY':
+        score = laptop.displayScore;
+        break;
+      case 'PERFORMANCE':
+        score = laptop.performanceScore;
+        break;
+      case 'PORTABILITY':
+        score = laptop.portabilityScore;
+        break;
+      case 'PRICE':
+        score = laptop.priceScore;
+        break;
+    }
 
-    // Negative aspects would subtract from a base score
-    return 3.0; // Default neutral rating
+    // If no score available, return a neutral rating
+    if (score == null) return 3.0;
+
+    // Constants for normalization
+    const int minPossibleScore = -10; // What you consider "terrible"
+    const int maxPossibleScore = 25; // What you consider "excellent"
+    const double minStars = 1.0; // Minimum star rating (not 0)
+    const double maxStars = 5.0; // Maximum star rating
+
+    // Normalize to 1-5 star range with clamping
+    double normalizedScore = minStars +
+        (score - minPossibleScore) *
+            (maxStars - minStars) /
+            (maxPossibleScore - minPossibleScore);
+
+    // Clamp between 1 and 5 stars
+    return normalizedScore.clamp(minStars, maxStars);
   }
 }
 

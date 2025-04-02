@@ -16,8 +16,8 @@ String getFirstPart(String? input) {
     return '';
   }
 
-  final parts = input.split(',');
-  return parts[0].trim();
+  final part = input.split(',')[0].trim().split("-")[0].trim();
+  return part;
 }
 
 /// Extracts the brand name from a laptop title.
@@ -85,4 +85,28 @@ String truncateString(String? input, int maxLength) {
   }
 
   return '${input.substring(0, maxLength)}...';
+}
+
+// Add a static utility function for text sanitization at the end of the file
+class TextSanitizer {
+  /// Sanitizes text by fixing common encoding issues with smart quotes and apostrophes
+  static String sanitize(String? text) {
+    if (text == null) return '';
+
+    return text
+        .replaceAll('\u201D', '"')
+        // Handle 3-byte UTF-8 sequences that appear as "â" + two chars
+        .replaceAllMapped(
+            RegExp('â[\u0080-\u00FF][\u0080-\u00FF]'), (match) => '"')
+        // Add specific handling for quote marks
+        .replaceAll('â€œ', '"') // Left double quote
+        .replaceAll('â€', '"') // Right double quote
+        .replaceAll('â€™', "'") // Right single quote
+        .replaceAll('â€˜', "'") // Left single quote
+        // Direct Unicode replacements for good measure
+        .replaceAll('\u201C', '"') // Left double quote mark
+        .replaceAll('\u201D', '"') // Right double quote mark
+        .replaceAll('\u2018', "'") // Left single quote mark
+        .replaceAll('\u2019', "'"); // Right single quote mark
+  }
 }
